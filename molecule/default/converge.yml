@@ -1,0 +1,21 @@
+- hosts: all
+  become: true
+  tasks:
+    - name: Include K3s installation tasks
+      include_tasks: ../tasks/k3s.yml
+
+    - name: Include AWX Operator installation tasks
+      include_tasks: ../tasks/awx-operator.yml
+
+    - name: Include AWX instance deployment tasks
+      include_tasks: ../tasks/awx-instance.yml
+
+    - name: Include cert-manager installation tasks
+      include_tasks: ../tasks/cert-manager.yml
+
+    - name: Wait for AWX to be ready
+      command: kubectl get pods -n awx
+      register: awx_pods
+      until: awx_pods.stdout.find('Running') != -1
+      retries: 10
+      delay: 10

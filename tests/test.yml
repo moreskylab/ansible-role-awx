@@ -1,0 +1,32 @@
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Include K3s installation tasks
+      include_tasks: ../tasks/k3s.yml
+
+    - name: Include AWX Operator installation tasks
+      include_tasks: ../tasks/awx-operator.yml
+
+    - name: Include AWX instance deployment tasks
+      include_tasks: ../tasks/awx-instance.yml
+
+    - name: Include cert-manager installation tasks
+      include_tasks: ../tasks/cert-manager.yml
+
+    - name: Verify AWX deployment
+      command: kubectl get pods -n awx
+      register: awx_pods
+
+    - name: Assert AWX pods are running
+      assert:
+        that:
+          - awx_pods.stdout | search("Running")
+        fail_msg: "AWX pods are not running as expected."
+
+    - name: Retrieve AWX admin password
+      command: kubectl get secret awx-demo-admin-password -n awx -o jsonpath="{.data.password}" | base64 --decode
+      register: awx_admin_password
+
+    - name: Display AWX admin password
+      debug:
+        msg: "AWX Admin Password: {{ awx_admin_password.stdout }}"

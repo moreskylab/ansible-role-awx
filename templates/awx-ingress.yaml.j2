@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: awx-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+    - hosts:
+        - awx.{{ domain_name }}  # Replace with your AWX domain
+      secretName: awx-tls-secret
+  rules:
+    - host: awx.{{ domain_name }}  # Replace with your AWX domain
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: awx-service  # Replace with your AWX service name
+                port:
+                  number: 80

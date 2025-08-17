@@ -1,0 +1,24 @@
+# defaults/main.yml
+
+# Default variables for the Ansible role 'ansible-role-awx'
+
+# Kubernetes configuration
+k3s_version: "v1.21.4+k3s1"
+k3s_install_command: "curl -sfL https://get.k3s.io | sh -"
+
+# AWX Operator configuration
+awx_operator_tag: "2.19.0"
+awx_namespace: "awx"
+awx_service_type: "nodeport"
+awx_nodeport_port: 32000
+
+# Let's Encrypt configuration
+letsencrypt_email: "your-email@example.com"  # Replace with your email
+letsencrypt_clusterissuer_name: "letsencrypt-prod"
+letsencrypt_tls_secret_name: "awx-tls-secret"
+
+# AWX Ingress configuration
+awx_domain: "awx.your-domain.com"  # Replace with your AWX domain
+
+# Other configurations
+kubectl_context: "default"  # Kubernetes context to use

@@ -1,0 +1,20 @@
+- name: Deploy AWX instance
+  hosts: localhost
+  tasks:
+    - name: Create AWX demo configuration
+      template:
+        src: awx-demo.yaml.j2
+        dest: ./awx-demo.yaml
+
+    - name: Apply AWX demo configuration
+      kubectl:
+        state: present
+        src: ./awx-demo.yaml
+
+    - name: Retrieve AWX admin password
+      command: kubectl get secret awx-demo-admin-password -n awx -o jsonpath="{.data.password}" | base64 --decode
+      register: awx_admin_password
+
+    - name: Display AWX admin password
+      debug:
+        msg: "AWX admin password: {{ awx_admin_password.stdout }}"

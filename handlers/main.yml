@@ -1,0 +1,17 @@
+- name: Restart AWX Operator
+  ansible.builtin.systemd:
+    name: awx-operator
+    state: restarted
+  when: awx_operator_changed
+
+- name: Restart K3s
+  ansible.builtin.systemd:
+    name: k3s
+    state: restarted
+  when: k3s_changed
+
+- name: Restart cert-manager
+  ansible.builtin.systemd:
+    name: cert-manager
+    state: restarted
+  when: cert_manager_changed

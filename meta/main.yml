@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  author: your_name
+  description: Ansible role for installing and configuring AWX on Kubernetes using K3s.
+  company: your_company
+  license: license_name
+  min_ansible_version: 2.9
+  platforms:
+    - name: Ubuntu
+      versions:
+        - bionic
+        - focal
+  dependencies: []
+
+dependencies: []

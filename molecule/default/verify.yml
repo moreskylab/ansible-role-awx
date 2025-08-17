@@ -1,0 +1,34 @@
+- name: Verify AWX installation
+  hosts: all
+  tasks:
+    - name: Check if AWX is running
+      command: kubectl get pods -n awx
+      register: awx_pods
+
+    - name: Assert AWX pods are running
+      assert:
+        that:
+          - awx_pods.stdout | search("Running")
+        fail_msg: "AWX pods are not running"
+
+    - name: Retrieve AWX admin password
+      command: kubectl get secret awx-demo-admin-password -n awx -o jsonpath="{.data.password}" | base64 --decode
+      register: awx_admin_password
+
+    - name: Assert AWX admin password is retrieved
+      assert:
+        that:
+          - awx_admin_password.stdout is not none
+        fail_msg: "Failed to retrieve AWX admin password"
+
+    - name: Verify AWX web interface is accessible
+      uri:
+        url: "http://awx.your-domain.com"  # Replace with your AWX domain
+        status_code: 200
+      register: awx_web_access
+
+    - name: Assert AWX web interface is accessible
+      assert:
+        that:
+          - awx_web_access.status == 200
+        fail_msg: "AWX web interface is not accessible"

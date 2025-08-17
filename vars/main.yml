@@ -1,0 +1,12 @@
+# vars/main.yml
+
+# Variables specific to the ansible-role-awx role
+awx_operator_tag: "2.19.0"
+awx_namespace: "awx"
+awx_service_type: "nodeport"
+awx_nodeport_port: 32000
+letsencrypt_email: "your-email@example.com"  # Replace with your email
+letsencrypt_clusterissuer_name: "letsencrypt-prod"
+awx_domain: "awx.your-domain.com"  # Replace with your AWX domain
+awx_tls_secret_name: "awx-tls-secret"
+awx_service_name: "awx-service"  # Replace with your AWX service name

@@ -1,0 +1,20 @@
+# yamllint configuration file
+
+extends: default
+
+rules:
+  line-length:
+    max: 120
+  truthy:
+    allowed: [true, false, yes, no]
+  comments:
+    require-starting-space: true
+    require-empty-line-before: true
+  indentation:
+    indent-sequences: true
+  document-start: disable
+  trailing-spaces: disable
+  empty-lines:
+    max: 2
+  no-duplicate-keys: enable
+  no-multiple-empty-lines: enable

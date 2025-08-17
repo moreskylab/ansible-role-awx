@@ -1,0 +1,28 @@
+---
+dependency:
+  - name: geerlingguy.k3s
+    version: 1.0.0
+  - name: ansible.awx
+    version: 1.0.0
+  - name: jetstack.cert-manager
+    version: 1.0.0
+
+driver:
+  name: docker
+
+platforms:
+  - name: awx
+    image: geerlingguy/docker-ubuntu2004-ansible:latest
+    pre_build_image: true
+    command: /bin/bash
+    volumes:
+      - ../..:/etc/ansible/roles/ansible-role-awx
+
+provisioner:
+  name: ansible
+  playbook: converge.yml
+  inventory: ../tests/inventory
+
+verifier:
+  name: ansible
+  playbook: verify.yml

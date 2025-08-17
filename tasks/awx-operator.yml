@@ -1,0 +1,63 @@
+- name: Install AWX Operator
+  hosts: localhost
+  tasks:
+    - name: Set AWX Operator version
+      set_fact:
+        awx_operator_tag: "2.19.0"
+
+    - name: Clone AWX Operator repository
+      git:
+        repo: https://github.com/ansible/awx-operator.git
+        dest: /tmp/awx-operator
+        version: "tags/{{ awx_operator_tag }}"
+
+    - name: Create kustomization.yaml
+      copy:
+        dest: /tmp/awx-operator/kustomization.yaml
+        content: |
+          apiVersion: kustomize.config.k8s.io/v1beta1
+          kind: Kustomization
+          resources:
+            - github.com/ansible/awx-operator/config/default?ref={{ awx_operator_tag }}
+          images:
+            - name: quay.io/ansible/awx-operator
+              newTag: {{ awx_operator_tag }}
+          namespace: awx
+
+    - name: Set Kubernetes context to AWX namespace
+      command: kubectl config set-context --current --namespace=awx
+
+    - name: Apply AWX Operator settings
+      command: kubectl apply -k /tmp/awx-operator
+
+    - name: Wait for AWX Operator to be running
+      command: kubectl get pods -n awx
+      register: awx_operator_status
+      until: awx_operator_status.stdout.find('Running') != -1
+      retries: 10
+      delay: 5
+
+    - name: Create AWX demo configuration
+      copy:
+        dest: /tmp/awx-operator/awx-demo.yaml
+        content: |
+          ---
+          apiVersion: awx.ansible.com/v1beta1
+          kind: AWX
+          metadata:
+            name: awx-demo
+          spec:
+            service_type: nodeport
+            nodeport_port: 32000
+          namespace: awx
+
+    - name: Apply AWX demo configuration
+      command: kubectl apply -f /tmp/awx-operator/awx-demo.yaml
+
+    - name: Retrieve AWX admin password
+      command: kubectl get secret awx-demo-admin-password -n awx -o jsonpath="{.data.password}" | base64 --decode
+      register: awx_admin_password
+
+    - name: Display AWX admin password
+      debug:
+        msg: "AWX Admin Password: {{ awx_admin_password.stdout }}"

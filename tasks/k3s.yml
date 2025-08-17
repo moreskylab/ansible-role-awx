@@ -1,0 +1,59 @@
+- name: Install K3s (lightweight Kubernetes)
+  become: true
+  shell: |
+    curl -sfL https://get.k3s.io | sh -
+  
+- name: Configure kubectl
+  become: true
+  copy:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: ~/.kube/config
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
+
+- name: Set KUBECONFIG environment variable
+  shell: echo "export KUBECONFIG=~/.kube/config" >> ~/.bashrc
+  args:
+    executable: /bin/bash
+
+- name: Verify K3s installation
+  command: kubectl get nodes
+  register: k3s_nodes
+  until: k3s_nodes is succeeded
+  retries: 5
+  delay: 10
+
+- name: Install AWX Operator
+  shell: |
+    export AWX_OPERATOR_TAG=2.19.0
+    git clone https://github.com/ansible/awx-operator.git
+    cd awx-operator
+    git checkout tags/$AWX_OPERATOR_TAG
+  args:
+    chdir: /path/to/desired/directory
+
+- name: Create kustomization.yaml
+  copy:
+    dest: kustomization.yaml
+    content: |
+      apiVersion: kustomize.config.k8s.io/v1beta1
+      kind: Kustomization
+      resources:
+        - github.com/ansible/awx-operator/config/default?ref={{ AWX_OPERATOR_TAG }}
+      images:
+        - name: quay.io/ansible/awx-operator
+          newTag: {{ AWX_OPERATOR_TAG }}
+      namespace: awx
+
+- name: Apply the operator settings
+  command: kubectl apply -k .
+  args:
+    chdir: /path/to/awx-operator
+
+- name: Wait for awx-operator to be running
+  command: kubectl get pods -n awx
+  register: awx_operator_status
+  until: awx_operator_status.stdout.find('Running') != -1
+  retries: 5
+  delay: 10

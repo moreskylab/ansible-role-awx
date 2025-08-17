@@ -1,0 +1,11 @@
+- name: Install K3s
+  include_tasks: k3s.yml
+
+- name: Install AWX Operator
+  include_tasks: awx-operator.yml
+
+- name: Deploy AWX Instance
+  include_tasks: awx-instance.yml
+
+- name: Install Cert Manager
+  include_tasks: cert-manager.yml
